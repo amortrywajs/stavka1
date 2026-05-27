@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ставка аккорд — PTP</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f4f0;color:#1a1916;min-height:100vh;padding:1.5rem 1rem}
+.container{max-width:680px;margin:0 auto}
+header{margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:2px solid #1a1916}
+header h1{font-size:1.1rem;font-weight:600}
+header p{font-size:0.78rem;color:#6b6960;margin-top:3px}
+h2{font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#6b6960;margin:1.25rem 0 .75rem}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:.5rem}
+@media(max-width:480px){.controls{grid-template-columns:1fr}}
+.field label{display:block;font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#6b6960;margin-bottom:7px}
+select,input[type=number]{width:100%;padding:10px 12px;font-size:0.9rem;font-family:inherit;border:1.5px solid #dddbd3;border-radius:8px;background:#fff;color:#1a1916;-webkit-appearance:none;appearance:none}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7'%3E%3Cpath d='M0 0l6 7 6-7z' fill='%236b6960'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+.slider-wrap{display:flex;flex-direction:column;gap:6px}
+.slider-header{display:flex;justify-content:space-between;align-items:center}
+.lbl{font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#6b6960}
+.margin-val{font-size:1.5rem;font-weight:700;color:#1a1916}
+input[type=range]{width:100%;height:4px;-webkit-appearance:none;appearance:none;background:#dddbd3;border-radius:2px;outline:none;cursor:pointer;margin-top:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#1a1916;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#1a1916;border:none;cursor:pointer}
+.slider-ticks{display:flex;justify-content:space-between;font-size:.68rem;color:#9b9a93}
+.result-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:.5rem}
+@media(max-width:420px){.result-cards{grid-template-columns:1fr}}
+.result-card{background:#fff;border:1.5px solid #dddbd3;border-radius:10px;padding:.85rem .75rem;text-align:center}
+.badge{display:inline-block;font-size:.66rem;font-weight:600;padding:3px 8px;border-radius:4px;margin-bottom:8px}
+.b1{background:#fdf0ee;color:#c0392b}
+.b2{background:#fef6ec;color:#b35c00}
+.b3{background:#eef7f0;color:#2d7a3a}
+.big-num{font-size:1.5rem;font-weight:700;line-height:1;color:#1a1916}
+.unit{font-size:.68rem;color:#9b9a93;margin-top:3px}
+.src{font-size:.68rem;color:#9b9a93;margin-top:5px}
+.src b{color:#6b6960;font-weight:500}
+.table-section{background:#fff;border:1.5px solid #dddbd3;border-radius:10px;overflow:hidden;margin-bottom:.5rem}
+.table-header{padding:.65rem 1rem;border-bottom:1px solid #dddbd3;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#6b6960;background:#f5f4f0}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+th{padding:8px 10px;text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:#9b9a93;border-bottom:1px solid #dddbd3;font-weight:500;background:#fafaf8}
+th:not(:first-child){text-align:right}
+td{padding:9px 10px;border-bottom:1px solid #f0efe9}
+td:not(:first-child){text-align:right;font-weight:600}
+td:first-child{color:#6b6960;font-size:.78rem}
+tr:last-child td{border-bottom:none}
+tr.active td{background:#fffde6}
+tr.active td:first-child{font-weight:600;color:#1a1916}
+.n1{color:#c0392b}.n2{color:#b35c00}.n3{color:#2d7a3a}
+.monthly-box{background:#fff;border:1.5px solid #dddbd3;border-radius:10px;overflow:hidden;margin-bottom:.5rem}
+.monthly-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.monthly-col{padding:1rem}
+.monthly-col:first-child{border-right:1px solid #f0efe9}
+.monthly-col h3{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#9b9a93;margin-bottom:.75rem}
+.mrow{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid #f5f4f0;font-size:.82rem}
+.mrow:last-child{border-bottom:none}
+.mrow.total{border-top:1.5px solid #dddbd3;border-bottom:none;margin-top:4px;padding-top:8px}
+.mrow.total .mlabel{font-weight:600;color:#1a1916}
+.mrow.total .mval{font-size:1.1rem;font-weight:700;color:#1a1916}
+.mlabel{color:#6b6960}
+.mval{font-weight:600;color:#1a1916}
+.mval.neg{color:#c0392b}
+.mval.agency{color:#2d7a3a}
+.badge-uz{display:inline-block;font-size:.66rem;font-weight:600;padding:2px 8px;border-radius:4px;background:#e8eaf6;color:#3949ab;margin-left:6px;vertical-align:middle}
+.info-row{font-size:.7rem;color:#9b9a93;margin:.5rem 0 1rem;line-height:1.5}
+.info-row b{color:#6b6960}
+@media(max-width:420px){.monthly-grid{grid-template-columns:1fr}.monthly-col:first-child{border-right:none;border-bottom:1px solid #f0efe9}}
+footer{margin-top:1.25rem;font-size:.7rem;color:#9b9a93;line-height:1.7;padding-top:1rem;border-top:1px solid #dddbd3}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <h1>Калькулятор ставки аккорд <span class="badge-uz">Umowa zlecenia</span></h1>
+  <p>PTP &middot; Спожывчый &middot; Ставка работника, нетто на руки, полная стоимость агентства</p>
+</header>
+
+<h2>Параметры</h2>
+<div class="controls">
+  <div class="field">
+    <label>Вес линии (кг/линию)</label>
+    <select id="sel">
+      <option value="0">пониже 8,5 кг/линию</option>
+      <option value="1">от 8,51 до 9,00</option>
+      <option value="2" selected>от 9,01 до 9,5</option>
+      <option value="3">от 9,51 до 10,00</option>
+      <option value="4">от 10,01 до 10,50</option>
+      <option value="5">от 10,51 до 11,00</option>
+      <option value="6">от 11,01 до 11,50</option>
+      <option value="7">свыше 11,51</option>
+    </select>
+  </div>
+  <div class="field">
+    <label>Маржа агентства</label>
+    <div class="slider-wrap">
+      <div class="slider-header">
+        <span class="lbl">% от ставки клиента</span>
+        <span class="margin-val" id="mv">15%</span>
+      </div>
+      <input type="range" id="sl" min="5" max="30" step="1" value="15">
+      <div class="slider-ticks"><span>5%</span><span>17,5%</span><span>30%</span></div>
+    </div>
+  </div>
+</div>
+<div class="controls">
+  <div class="field">
+    <label>Тонн в день (на 1 работника)</label>
+    <input type="number" id="tday" value="9" min="1" max="30" step="0.5">
+  </div>
+  <div class="field">
+    <label>Рабочих дней в месяц</label>
+    <input type="number" id="dmon" value="25" min="1" max="31" step="1">
+  </div>
+</div>
+
+<h2>Ставка за тонну — по порогам качества</h2>
+<div class="result-cards">
+  <div class="result-card">
+    <div class="badge b1">Порог &laquo;-1&raquo;</div>
+    <div class="big-num" id="v1">—</div>
+    <div class="unit">зл / тонну (работнику)</div>
+    <div class="src">клиент платит: <b id="s1">—</b> зл</div>
+  </div>
+  <div class="result-card">
+    <div class="badge b2">Порог &laquo;&gt;0 и &lt;=-1&raquo;</div>
+    <div class="big-num" id="v2">—</div>
+    <div class="unit">зл / тонну (работнику)</div>
+    <div class="src">клиент платит: <b id="s2">—</b> зл</div>
+  </div>
+  <div class="result-card">
+    <div class="badge b3">Порог &laquo;0&raquo;</div>
+    <div class="big-num" id="v3">—</div>
+    <div class="unit">зл / тонну (работнику)</div>
+    <div class="src">клиент платит: <b id="s3">—</b> зл</div>
+  </div>
+</div>
+
+<div class="info-row">
+  ZUS Umowa zlecenia: работодатель платит дополнительно <b>~20,81%</b> от брутто (emerytalne 9,76% + rentowe 6,5% + wypadkowe 1,67% + FP 2,45% + FGSP 0,10% + zdrowotne 0,33%). Работник: emerytalne 9,76% + rentowe 1,5% + zdrowotne 9% + PIT ~12%.
+</div>
+
+<h2>Расчёт в месяц (на 1 работника)</h2>
+<div class="monthly-box">
+  <div class="table-header" id="mheader">Порог «-1» &mdash; загрузка: — т/мес</div>
+  <div style="display:flex;gap:0;border-bottom:1px solid #dddbd3;background:#fafaf8;padding:6px 1rem">
+    <button onclick="setTab(0)" id="tab0" style="flex:1;padding:6px;border:none;border-radius:6px;font-size:.78rem;font-weight:600;cursor:pointer;background:#1a1916;color:#fff">Порог «-1»</button>
+    <button onclick="setTab(1)" id="tab1" style="flex:1;padding:6px;border:none;border-radius:6px;font-size:.78rem;font-weight:600;cursor:pointer;background:transparent;color:#6b6960;margin:0 4px">Порог «&gt;0 и &lt;=-1»</button>
+    <button onclick="setTab(2)" id="tab2" style="flex:1;padding:6px;border:none;border-radius:6px;font-size:.78rem;font-weight:600;cursor:pointer;background:transparent;color:#6b6960">Порог «0»</button>
+  </div>
+  <div class="monthly-grid">
+    <div class="monthly-col">
+      <h3>Работник получает</h3>
+      <div class="mrow"><span class="mlabel">Брутто (аккорд)</span><span class="mval" id="m_brutto">—</span></div>
+      <div class="mrow"><span class="mlabel">ZUS работника</span><span class="mval neg" id="m_zus_w">—</span></div>
+      <div class="mrow"><span class="mlabel">Налог PIT ~12%</span><span class="mval neg" id="m_pit">—</span></div>
+      <div class="mrow total"><span class="mlabel">Нетто на руки</span><span class="mval" id="m_netto">—</span></div>
+    </div>
+    <div class="monthly-col">
+      <h3>Агентство платит</h3>
+      <div class="mrow"><span class="mlabel">Брутто работника</span><span class="mval" id="m_brutto2">—</span></div>
+      <div class="mrow"><span class="mlabel">ZUS работодателя</span><span class="mval neg" id="m_zus_e">—</span></div>
+      <div class="mrow"><span class="mlabel">Маржа агентства</span><span class="mval agency" id="m_margin">—</span></div>
+      <div class="mrow total"><span class="mlabel">Выручка от клиента</span><span class="mval" id="m_client">—</span></div>
+    </div>
+  </div>
+</div>
+
+<h2>Все диапазоны 9&ndash;11 кг (ставка работнику)</h2>
+<div class="table-section">
+  <table>
+    <thead>
+      <tr>
+        <th>Диапазон</th>
+        <th>&laquo;-1&raquo;</th>
+        <th>&laquo;&gt;0 и &lt;=-1&raquo;</th>
+        <th>&laquo;0&raquo;</th>
+      </tr>
+    </thead>
+    <tbody id="tb"></tbody>
+  </table>
+</div>
+
+<footer>
+  <b>ZUS Umowa zlecenia (работодатель ~20,81%):</b> emerytalne 9,76% + rentowe 6,5% + wypadkowe 1,67% + FP 2,45% + FGSP 0,10% + zdrowotne 0,33%<br>
+  <b>ZUS работника (~11,26%):</b> emerytalne 9,76% + rentowe 1,5%<br>
+  <b>Zdrowotne работника:</b> 9% (вычитается из налоговой базы)<br>
+  <b>Формула ставки:</b> ставка работника = ставка клиента &times; (1 &minus; маржа)<br>
+  Расчёт ориентировочный. PIT упрощён (12% без учёта kosztow uzyskania i kwoty wolnej).
+</footer>
+</div>
+
+<script>
+var R=[
+  {l:"< 8,5 кг",r:[47.60,53.10,56.70]},
+  {l:"8,51-9,00 кг",r:[47.00,52.30,56.00]},
+  {l:"9,01-9,5 кг",r:[46.40,51.70,55.20]},
+  {l:"9,51-10,00 кг",r:[45.70,51.00,54.40]},
+  {l:"10,01-10,50 кг",r:[44.80,50.10,53.60]},
+  {l:"10,51-11,00 кг",r:[44.10,49.20,52.50]},
+  {l:"11,01-11,50 кг",r:[43.50,48.50,51.70]},
+  {l:"> 11,51 кг",r:[42.60,47.50,50.80]}
+];
+var T=[2,3,4,5];
+var ZUS_E=0.2081;
+var ZUS_W=0.1126;
+var ZDR=0.09;
+var PIT=0.12;
+var currentTab=0;
+
+function fmt(n){return n.toFixed(2).replace('.',',')+" зл";}
+function c(b,m){return b*(1-m/100);}
+
+function calcMonthly(stavka, tons){
+  var brutto=stavka*tons;
+  var zusW=brutto*ZUS_W;
+  var base=brutto-zusW;
+  var zdr=base*ZDR;
+  var pit=(base-zdr)*PIT;
+  var netto=base-zdr-pit;
+  var zusE=brutto*ZUS_E;
+  return {brutto:brutto,zusW:zusW,pit:pit,netto:netto,zusE:zusE};
+}
+
+function setTab(t){
+  currentTab=t;
+  var tabs=['tab0','tab1','tab2'];
+  for(var i=0;i<3;i++){
+    var el=document.getElementById(tabs[i]);
+    if(i===t){el.style.background='#1a1916';el.style.color='#fff';}
+    else{el.style.background='transparent';el.style.color='#6b6960';}
+  }
+  upd();
+}
+
+function upd(){
+  var idx=parseInt(document.getElementById('sel').value);
+  var m=parseInt(document.getElementById('sl').value);
+  var tday=parseFloat(document.getElementById('tday').value)||9;
+  var dmon=parseInt(document.getElementById('dmon').value)||25;
+  var tons=tday*dmon;
+
+  document.getElementById('mv').textContent=m+'%';
+
+  var row=R[idx];
+  var wRates=[c(row.r[0],m),c(row.r[1],m),c(row.r[2],m)];
+
+  document.getElementById('v1').textContent=wRates[0].toFixed(2);
+  document.getElementById('v2').textContent=wRates[1].toFixed(2);
+  document.getElementById('v3').textContent=wRates[2].toFixed(2);
+  document.getElementById('s1').textContent=row.r[0].toFixed(2);
+  document.getElementById('s2').textContent=row.r[1].toFixed(2);
+  document.getElementById('s3').textContent=row.r[2].toFixed(2);
+
+  var tabNames=['Порог «-1»','Порог «>0 и <=-1»','Порог «0»'];
+  document.getElementById('mheader').textContent=tabNames[currentTab]+' — загрузка: '+tons.toFixed(0)+' т/мес';
+
+  var stavka=wRates[currentTab];
+  var clientStavka=row.r[currentTab];
+  var d=calcMonthly(stavka,tons);
+  var clientTotal=clientStavka*tons;
+  var marginAmt=clientTotal-d.brutto-d.zusE;
+
+  document.getElementById('m_brutto').textContent=fmt(d.brutto);
+  document.getElementById('m_zus_w').textContent='-'+fmt(d.zusW);
+  document.getElementById('m_pit').textContent='-'+fmt(d.pit);
+  document.getElementById('m_netto').textContent=fmt(d.netto);
+  document.getElementById('m_brutto2').textContent=fmt(d.brutto);
+  document.getElementById('m_zus_e').textContent=fmt(d.zusE);
+  document.getElementById('m_margin').textContent='+'+fmt(marginAmt);
+  document.getElementById('m_client').textContent=fmt(clientTotal);
+
+  var tb=document.getElementById('tb');
+  tb.innerHTML='';
+  for(var i=0;i<T.length;i++){
+    var ri=T[i];
+    var r=R[ri];
+    var tr=document.createElement('tr');
+    if(ri===idx) tr.className='active';
+    tr.innerHTML='<td>'+r.l+(ri===idx?' ◀':'')+'</td>'
+      +'<td class="n1">'+c(r.r[0],m).toFixed(2)+'</td>'
+      +'<td class="n2">'+c(r.r[1],m).toFixed(2)+'</td>'
+      +'<td class="n3">'+c(r.r[2],m).toFixed(2)+'</td>';
+    tb.appendChild(tr);
+  }
+}
+
+document.getElementById('sel').addEventListener('change',upd);
+document.getElementById('sl').addEventListener('input',upd);
+document.getElementById('tday').addEventListener('input',upd);
+document.getElementById('dmon').addEventListener('input',upd);
+upd();
+</script>
+</body>
+</html>
